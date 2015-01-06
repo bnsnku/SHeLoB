@@ -34,9 +34,11 @@
     nextpose_ = (unsigned int *) malloc(AX12_MAX_SERVOS * sizeof(unsigned int));
     speed_ = (int *) malloc(AX12_MAX_SERVOS * sizeof(int));
     // initialize
+    printf("Initialize Poses\n");
     for(i=0;i<AX12_MAX_SERVOS;i++){
         id_[i] = i+1;
         pose_[i] = 512;
+        printf("pose_[%d] : %d\n",id_[i],pose_[i]);
         nextpose_[i] = 512;
     }
     interpolating = 0;
@@ -85,12 +87,13 @@ void BioloidController::loadPose( const unsigned int * addr ){
 /* read in current servo positions to the pose. */
 // New readPose function
 void BioloidController::readPose(){
+    printf("Reading Pose\n");
     for(int i=0;i<poseSize;i++){
         pose_[i] = dxl_read_word(id_[i],P_PRESENT_POSITION_L) << BIOLOID_SHIFT;
-        printf("ID%d; CurrentPosition:%d\n",id_[i],(pose_[i]>>BIOLOID_SHIFT));
+        printf("pose_[%d] : %d\n",id_[i],(pose_[i]>>BIOLOID_SHIFT));
         while(pose_[i] == 0) {    // 
             pose_[i] = dxl_read_word(id_[i],P_PRESENT_POSITION_L) << BIOLOID_SHIFT;
-            printf("ID%d : ReadPos %d\n",id_[i],pose_[i]);
+            printf("pose_[%d] : %d\n",id_[i],pose_[i]);
         }
         usleep(25000);
     }

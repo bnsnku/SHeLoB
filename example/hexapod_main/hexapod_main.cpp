@@ -21,6 +21,7 @@
   int multiplier;
 // Initialize the clock so we can take time readings between each movement. (Arduino uses millis())
   clock_t start;
+  int control;
 
 #define RIPPLE_SPEED    1
 #define AMBLE_SPEED     3
@@ -72,16 +73,45 @@
     multiplier = AMBLE_SPEED;
 
 	// Repeatedly call this function
-    //while(control == 1)
-    for(int i = 0;i<100;i++) {
+    control = 1;
+    while(control == 1) {
+      for(int i = 0;i<100;i++) {
       //printf("Iteration %d\n",i);
-      loop(i);
+        loop(i);
+      }
     }
     dxl_terminate();
   }
 
   void loop(int iter){
-  // take commands
+  // take commands 
+    /*
+  int c;
+  system("/bin/stty raw");
+  while((c=getchar())!='.')
+    putchar(c);
+    */
+  int key;
+  key = getchar();
+  switch(key)
+  {
+    case 'w':
+    Xspeed = 100;
+    break;
+    case 's':
+    Xspeed = -100;
+    break;
+    case 'd':
+    Yspeed = 100;
+    break;
+    case 'a':
+    Yspeed = -100;
+    break;
+    case 'q':
+    control = 0;
+    return;
+    break;
+  }
 	/*
   if(command.ReadMsgs() > 0){
     digitalWrite(0,HIGH-digitalRead(0));
@@ -135,9 +165,9 @@
       Rspeed = 0;
     }
   */
-  Xspeed = 5; //CHANGE THIS
-  Yspeed = 0;
-  Rspeed = 0;
+  //Xspeed = 200; //CHANGE THIS
+  //Yspeed = 0;
+  //Rspeed = 0;
   // if our previous interpolation is complete, recompute the IK
   if(bioloid.interpolating == 0){
     doIK();

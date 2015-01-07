@@ -35,13 +35,13 @@
 #define TOP_SPEED      12
 #endif
 
-  void loop(int iter);
+  void loop();
 
   int main() {
 	// setup IK
   	setupIK();
     //printf("Setup complete.\n");
-  	gaitSelect(AMBLE_SMOOTH);
+  	gaitSelect(RIPPLE_SMOOTH);
      //Grab a clock reading
     start = clock();
   	// setup serial
@@ -70,42 +70,64 @@
     //delay(3); Probably don't need for linux machine.
       usleep(3000); //microseconds
     }
-    multiplier = AMBLE_SPEED;
+    multiplier = RIPPLE_SPEED;
 
 	// Repeatedly call this function
     control = 1;
-    while(control == 1) {
-      for(int i = 0;i<100;i++) {
+    int c;
+    c = system("/bin/stty raw");
+    while(1) {
+    //for(int i = 0;i<100;i++) {
       //printf("Iteration %d\n",i);
-        loop(i);
+      if(control == 1){
+        loop();
+      }
+      else {
+        c = system("/bin/stty cooked");
+        printf("Terminal set to %d\n",c);
+        break;
       }
     }
     dxl_terminate();
   }
 
-  void loop(int iter){
+  void loop(){
   // take commands 
-    /*
-  int c;
-  system("/bin/stty raw");
-  while((c=getchar())!='.')
-    putchar(c);
-    */
   int key;
   key = getchar();
   switch(key)
   {
     case 'w':
-    Xspeed = 100;
+    Xspeed = 80;
     break;
     case 's':
-    Xspeed = -100;
+    Xspeed = -80;
     break;
     case 'd':
-    Yspeed = 100;
+    Yspeed = 80;
     break;
     case 'a':
-    Yspeed = -100;
+    Yspeed = -80;
+    break;
+    case 'z':
+    gaitSelect(RIPPLE_SMOOTH);
+    multiplier = RIPPLE_SPEED;
+    break;
+    case 'x':
+    gaitSelect(AMBLE_SMOOTH);
+    multiplier = AMBLE_SPEED;
+    break;
+    case 'c':
+    gaitSelect(RIPPLE);
+    multiplier = RIPPLE_SPEED;
+    break;
+    case 'v':
+    gaitSelect(AMBLE);
+    multiplier = AMBLE_SPEED;
+    break;
+    case 'b':
+    gaitSelect(TRIPOD);
+    multiplier = TRIPOD_SPEED;
     break;
     case 'q':
     control = 0;

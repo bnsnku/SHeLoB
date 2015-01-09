@@ -38,7 +38,7 @@
     for(i=0;i<AX12_MAX_SERVOS;i++){
         id_[i] = i+1;
         pose_[i] = 512;
-        printf("pose_[%d] : %d\n",id_[i],pose_[i]);
+        //printf("pose_[%d] : %d\n",id_[i],pose_[i]);
         nextpose_[i] = 512;
     }
     interpolating = 0;
@@ -88,14 +88,16 @@ void BioloidController::loadPose( const unsigned int * addr ){
 // New readPose function
 void BioloidController::readPose(){
     printf("Reading Pose\n");
+    int reg1, reg2;
     for(int i=0;i<poseSize;i++){
-        pose_[i] = dxl_read_word(id_[i],P_PRESENT_POSITION_L) << BIOLOID_SHIFT;
-        printf("pose_[%d] : %d\n",id_[i],(pose_[i]>>BIOLOID_SHIFT));
-        while(pose_[i] == 0) {    // 
-            pose_[i] = dxl_read_word(id_[i],P_PRESENT_POSITION_L) << BIOLOID_SHIFT;
-            printf("pose_[%d] : %d\n",id_[i],pose_[i]);
-        }
-        usleep(25000);
+        // Check to make sure that you read two of the same readings and that they aren't 0 before you set pose_[i]
+        do{
+            reg1 = dxl_read_word(id_[i],P_PRESENT_POSITION_L) << BIOLOID_SHIFT;
+            usleep(20000);
+            reg2 = dxl_read_word(id_[i],P_PRESENT_POSITION_L) << BIOLOID_SHIFT;
+        }while(reg1 != reg2 || reg2 == 0);
+        pose_[i] = reg2;
+        printf("pose_[%d] : %d\n",id_[i],pose_[i]>>BIOLOID_SHIFT);
     }
 }
 /*
@@ -198,14 +200,16 @@ void BioloidController::interpolateStep(){
                 if(diff < speed_[i]){
                     pose_[i] = nextpose_[i];
                     complete--;
-                }else
+                }else{
                 pose_[i] += speed_[i];
+                }
             }else{
                 if((-diff) < speed_[i]){
                     pose_[i] = nextpose_[i];
                     complete--;
-                }else
-                pose_[i] -= speed_[i];                
+                }else{
+                pose_[i] -= speed_[i];
+                }                
             }       
         }
     }

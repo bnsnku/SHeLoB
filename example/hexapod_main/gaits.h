@@ -19,6 +19,7 @@ extern void (*gaitSetup)();
 #define AMBLE_SMOOTH            5
 /* tripod gaits are only for hexapods */
 #define TRIPOD                  6
+#define BACK                    10                     //add by Xuan
 
 #define MOVING   ((Xspeed > 5 || Xspeed < -5) || (Yspeed > 5 || Yspeed < -5) || (Rspeed > 0.05 || Rspeed < -0.05))
 /* Standard Transition time should be of the form (k*BIOLOID_FRAME_LENGTH)-1
@@ -104,6 +105,30 @@ ik_req_t SmoothGaitGen(int leg){
   return gaits[leg];
 }
 
+ik_req_t SmoothGaitGen_Back(int leg){                  //add by Xuan
+    if(step == gaitLegNo[leg]){
+      // leg up, middle position
+      gaits[leg].x = 0;
+      gaits[leg].y = 0;
+      gaits[leg].z = -18;
+      gaits[leg].r = 0;
+    }else if(((step == gaitLegNo[leg]+1) || (step == gaitLegNo[leg]-(stepsInCycle-1))) && (gaits[leg].z < 0)){
+      // leg down position                                           NOTE: dutyFactor = pushSteps/StepsInCycle
+      gaits[leg].x = 0;     // travel/Cycle = speed*cycleTime
+      gaits[leg].y = 0;     // Stride = travel/Cycle * dutyFactor
+      gaits[leg].z = 0;                                                 //   = speed*cycleTime*pushSteps/stepsInCycle
+      gaits[leg].r = 0;     //   we move Stride/2 here
+    }else{
+      // move body forward
+      gaits[leg].x = gaits[leg].x;    // note calculations for Stride above
+      gaits[leg].y = gaits[leg].y;    // we have to move Stride/pushSteps here
+      gaits[leg].z = 0;                                                 //   = speed*cycleTime*pushSteps/stepsInCycle*pushSteps
+      gaits[leg].r = gaits[leg].r;    //   = speed*cycleTime/stepsInCycle
+    }
+  
+  return gaits[leg];
+}
+
 int currentGait = -1;
 
 void gaitSelect(int GaitType){
@@ -172,6 +197,18 @@ void gaitSelect(int GaitType){
     stepsInCycle = 4;
     tranTime = 65;
   }
+  else if(GaitType == BACK){        //add by Xuan
+    gaitGen = &SmoothGaitGen_Back;
+    gaitSetup = &DefaultGaitSetup;
+    gaitLegNo[RIGHT_FRONT] = 0;
+    gaitLegNo[LEFT_MIDDLE] = 2;
+    gaitLegNo[RIGHT_REAR] = 4;
+    gaitLegNo[LEFT_FRONT] = 6;
+    gaitLegNo[RIGHT_MIDDLE] = 8;
+    gaitLegNo[LEFT_REAR] = 10;
+    stepsInCycle = 12;
+  }
+
   if(cycleTime == 0)
     cycleTime = (stepsInCycle*tranTime)/1000.0;
   step = 0;

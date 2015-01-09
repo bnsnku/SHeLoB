@@ -1,8 +1,8 @@
 /* 	Main code for hexapod (SHeLoB)
 	Jeff Yu, Dan Sun, Xuan Lin
+  December 2014
 	*/
 
-//#include <ax12.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
@@ -19,9 +19,9 @@
 
 //Commander command = Commander();
   int multiplier;
-// Initialize the clock so we can take time readings between each movement. (Arduino uses millis())
-  clock_t start;
+  clock_t start;  // Initialize the clock so we can take time readings between each movement. (Arduino uses millis())
   int control;
+  extern ik_req_t gaits[];
 
 #define RIPPLE_SPEED    1
 #define AMBLE_SPEED     3
@@ -44,8 +44,6 @@
   	gaitSelect(RIPPLE_SMOOTH);
      //Grab a clock reading
     start = clock();
-  	// setup serial
-  	//Serial.begin(38400);
   	/*
   	// wait, then check the voltage (LiPO safety)
   	delay (1000);
@@ -58,31 +56,28 @@
 	*/
   	// stand up slowly
     bioloid.poseSize = 18;
-    //printf("Pose size set.\n");
     bioloid.readPose();
-    printf("Pose Read\n");
+    //printf("Pose Read\n");
     doIK();
-    printf("inverse kinematics done.\n");
     bioloid.interpolateSetup(1000);
-    printf("Interpolate Setup done.\n");
     while(bioloid.interpolating > 0){
       bioloid.interpolateStep();
-    //delay(3); Probably don't need for linux machine.
-      usleep(3000); //microseconds
+      usleep(10000); // Delay 10 milliseconds between each move to slow down the motion
     }
+    printf("Setup Complete\nUse w, a, s, d to control direction\nq to quit\n");
     multiplier = RIPPLE_SPEED;
 
 	// Repeatedly call this function
     control = 1;
     int c;
+    // Set terminal to take continuous input without having to press enter each time
     c = system("/bin/stty raw");
     while(1) {
-    //for(int i = 0;i<100;i++) {
-      //printf("Iteration %d\n",i);
       if(control == 1){
         loop();
       }
       else {
+        // Return terminal to standard input
         c = system("/bin/stty cooked");
         printf("Terminal set to %d\n",c);
         break;
@@ -92,48 +87,77 @@
   }
 
   void loop(){
+    int stepcount = 0;
+    int flag = 0;  //add by Xuan
   // take commands 
-  int key;
-  key = getchar();
-  switch(key)
-  {
-    case 'w':
-    Xspeed = 80;
-    break;
-    case 's':
-    Xspeed = -80;
-    break;
-    case 'd':
-    Yspeed = 80;
-    break;
-    case 'a':
-    Yspeed = -80;
-    break;
-    case 'z':
-    gaitSelect(RIPPLE_SMOOTH);
-    multiplier = RIPPLE_SPEED;
-    break;
-    case 'x':
-    gaitSelect(AMBLE_SMOOTH);
-    multiplier = AMBLE_SPEED;
-    break;
-    case 'c':
-    gaitSelect(RIPPLE);
-    multiplier = RIPPLE_SPEED;
-    break;
-    case 'v':
-    gaitSelect(AMBLE);
-    multiplier = AMBLE_SPEED;
-    break;
-    case 'b':
-    gaitSelect(TRIPOD);
-    multiplier = TRIPOD_SPEED;
-    break;
-    case 'q':
-    control = 0;
-    return;
-    break;
-  }
+    int key;
+    key = getchar();
+    switch(key)
+    {
+      case 'w':
+      Xspeed = 50;
+      Yspeed = 0;
+      Rspeed = 0;
+      break;
+      case 's':
+      Xspeed = -50;
+      Yspeed = 0;
+      Rspeed = 0;
+      break;
+      case 'd':
+      Xspeed = 0;
+      Yspeed = 50;
+      Rspeed = 0;
+      break;
+      case 'a':
+      Xspeed = 0;
+      Yspeed = -50;
+      Rspeed = 0;
+      break;
+      case 'z':
+      gaitSelect(RIPPLE_SMOOTH);
+      multiplier = RIPPLE_SPEED;
+      flag = 1;
+      break;
+      case 'x':
+      gaitSelect(AMBLE_SMOOTH);
+      multiplier = AMBLE_SPEED;
+      flag = 1;
+      break;
+      case 'c':
+      gaitSelect(RIPPLE);
+      multiplier = RIPPLE_SPEED;
+      flag = 1;
+      break;
+      case 'v':
+      gaitSelect(AMBLE);
+      multiplier = AMBLE_SPEED;
+      flag = 1;
+      break;
+      case 'b':
+      gaitSelect(TRIPOD);
+      multiplier = TRIPOD_SPEED;
+      flag = 1;
+      break;
+      case 'q':
+      control = 0;
+      return;
+      break;
+      case 'o':     //add by Xuan
+      Xspeed = 0;
+      Yspeed = 0;
+      Rspeed = 0;
+      flag = 2;
+      break;
+
+      case 'p':
+      gaitSelect(BACK);
+      flag = 0;
+      break;
+
+      default:
+      break;
+    }
 	/*
   if(command.ReadMsgs() > 0){
     digitalWrite(0,HIGH-digitalRead(0));
@@ -191,11 +215,32 @@
   //Yspeed = 0;
   //Rspeed = 0;
   // if our previous interpolation is complete, recompute the IK
-  if(bioloid.interpolating == 0){
-    doIK();
+    //while(stepcount != (stepsInCycle)) {
+  if (flag == 0)
+    {
+      if(bioloid.interpolating == 0){
+      doIK();
+      stepcount++;
     //printf("Inverse Kinetmatics Done for Iteration %d\n",iter);
-    bioloid.interpolateSetup(tranTime);
-  }
+      bioloid.interpolateSetup(tranTime);
+    }
   // update joints
-  bioloid.interpolateStep();
-}
+    bioloid.interpolateStep();
+    }
+  else if (flag == 1)
+  {  
+  }
+  else if(flag == 2)    //add by Xuan
+  {
+    if(bioloid.interpolating == 0){
+      doIK_Z0();
+      stepcount++;
+    //printf("Inverse Kinetmatics Done for Iteration %d\n",iter);
+      bioloid.interpolateSetup(tranTime);
+    }
+  // update joints
+    bioloid.interpolateStep();
+  }
+
+  }
+  //}

@@ -129,7 +129,6 @@ void doIK(){
     ik_sol_t sol;
 
     gaitSetup();
-
     // right front leg
     gait = gaitGen(RIGHT_FRONT);
     req = bodyIK(endpoints[RIGHT_FRONT].x+gait.x, endpoints[RIGHT_FRONT].y+gait.y, endpoints[RIGHT_FRONT].z+gait.z, X_COXA, Y_COXA, gait.r);
@@ -247,6 +246,165 @@ void doIK(){
 
     // left middle leg
     gait = gaitGen(LEFT_MIDDLE);
+    req = bodyIK(endpoints[LEFT_MIDDLE].x+gait.x,endpoints[LEFT_MIDDLE].y+gait.y, endpoints[LEFT_MIDDLE].z+gait.z, 0, -Y_COXA, gait.r);
+    sol = legIK(endpoints[LEFT_MIDDLE].x+req.x+gait.x,-endpoints[LEFT_MIDDLE].y-req.y-gait.y,endpoints[LEFT_MIDDLE].z+req.z+gait.z);
+    servo = 512 - sol.coxa;
+    if(servo < maxs[LM_COXA-1] && servo > mins[LM_COXA-1])
+        bioloid.setNextPose(LM_COXA, servo);
+    else{
+        printf("LM_COXA FAIL: %d\n", servo);
+    }
+    servo = 500 - sol.femur;
+    if(servo < maxs[LM_FEMUR-1] && servo > mins[LM_FEMUR-1])
+        bioloid.setNextPose(LM_FEMUR, servo);
+    else{
+        printf("LM_FEMUR FAIL: %d\n", servo);
+    }
+    servo = 670 - sol.tibia;
+    if(servo < maxs[LM_TIBIA-1] && servo > mins[LM_TIBIA-1])
+        bioloid.setNextPose(LM_TIBIA, servo);
+    else{
+        printf("LM_TIBIA FAIL: %d\n", servo);
+    }
+    step = (step+1)%stepsInCycle;
+}
+
+void doIK_Z0(){      //add by Xuan
+    int servo;
+    ik_req_t req, gait;
+    ik_sol_t sol;
+
+    gaitSetup();
+
+    // right front leg
+    gait = gaitGen(RIGHT_FRONT);
+    gait.z = 0;
+
+    req = bodyIK(endpoints[RIGHT_FRONT].x+gait.x, endpoints[RIGHT_FRONT].y+gait.y, endpoints[RIGHT_FRONT].z+gait.z, X_COXA, Y_COXA, gait.r);
+    sol = legIK(endpoints[RIGHT_FRONT].x+req.x+gait.x,endpoints[RIGHT_FRONT].y+req.y+gait.y,endpoints[RIGHT_FRONT].z+req.z+gait.z);
+    servo = 368 + sol.coxa;
+    if(servo < maxs[RF_COXA-1] && servo > mins[RF_COXA-1])
+        bioloid.setNextPose(RF_COXA, servo);
+    else{
+        printf("RF_COXA FAIL: %d\n", servo);
+    }
+    servo = 524 + sol.femur;
+    if(servo < maxs[RF_FEMUR-1] && servo > mins[RF_FEMUR-1])
+        bioloid.setNextPose(RF_FEMUR, servo);
+    else{
+        printf("RF_FEMUR FAIL: %d\n", servo);
+    }
+    servo = 354 + sol.tibia;
+    if(servo < maxs[RF_TIBIA-1] && servo > mins[RF_TIBIA-1])
+        bioloid.setNextPose(RF_TIBIA, servo);
+    else{
+        printf("RF_TIBIA FAIL: %d\n", servo);
+    }
+
+    // right rear leg
+    gait = gaitGen(RIGHT_REAR);
+    gait.z = 0;
+
+    req = bodyIK(endpoints[RIGHT_REAR].x+gait.x,endpoints[RIGHT_REAR].y+gait.y, endpoints[RIGHT_REAR].z+gait.z, -X_COXA, Y_COXA, gait.r);
+    sol = legIK(-endpoints[RIGHT_REAR].x-req.x-gait.x,endpoints[RIGHT_REAR].y+req.y+gait.y,endpoints[RIGHT_REAR].z+req.z+gait.z);
+    servo = 656 - sol.coxa;
+    if(servo < maxs[RR_COXA-1] && servo > mins[RR_COXA-1])
+        bioloid.setNextPose(RR_COXA, servo);
+    else{
+        printf("RR_COXA FAIL: %d\n", servo);
+    }
+    servo = 524 + sol.femur;
+    if(servo < maxs[RR_FEMUR-1] && servo > mins[RR_FEMUR-1])
+        bioloid.setNextPose(RR_FEMUR, servo);
+    else{
+        printf("RR_FEMUR FAIL: %d\n", servo);
+    }
+    servo = 354 + sol.tibia;
+    if(servo < maxs[RR_TIBIA-1] && servo > mins[RR_TIBIA-1])
+        bioloid.setNextPose(RR_TIBIA, servo);
+    else{
+        printf("RR_TIBIA FAIL: %d\n", servo);
+    }
+
+    // left front leg
+    gait = gaitGen(LEFT_FRONT);
+    gait.z = 0;
+
+    req = bodyIK(endpoints[LEFT_FRONT].x+gait.x,endpoints[LEFT_FRONT].y+gait.y, endpoints[LEFT_FRONT].z+gait.z, X_COXA, -Y_COXA, gait.r);
+    sol = legIK(endpoints[LEFT_FRONT].x+req.x+gait.x,-endpoints[LEFT_FRONT].y-req.y-gait.y,endpoints[LEFT_FRONT].z+req.z+gait.z);
+    servo = 656 - sol.coxa;
+    if(servo < maxs[LF_COXA-1] && servo > mins[LF_COXA-1])
+        bioloid.setNextPose(LF_COXA, servo);
+    else{
+        printf("LF_COXA FAIL: %d\n", servo);
+    }
+    servo = 500 - sol.femur;
+    if(servo < maxs[LF_FEMUR-1] && servo > mins[LF_FEMUR-1])
+        bioloid.setNextPose(LF_FEMUR, servo);
+    else{
+        printf("LF_FEMUR FAIL: %d\n", servo);
+    }
+    servo = 670 - sol.tibia;
+    if(servo < maxs[LF_TIBIA-1] && servo > mins[LF_TIBIA-1])
+        bioloid.setNextPose(LF_TIBIA, servo);
+    else{
+        printf("LF_TIBIA FAIL: %d\n", servo);
+    }
+
+    // left rear leg
+    gait = gaitGen(LEFT_REAR);
+    gait.z = 0;
+
+    req = bodyIK(endpoints[LEFT_REAR].x+gait.x,endpoints[LEFT_REAR].y+gait.y, endpoints[LEFT_REAR].z+gait.z, -X_COXA, -Y_COXA, gait.r);
+    sol = legIK(-endpoints[LEFT_REAR].x-req.x-gait.x,-endpoints[LEFT_REAR].y-req.y-gait.y,endpoints[LEFT_REAR].z+req.z+gait.z);
+    servo = 368 + sol.coxa;
+    if(servo < maxs[LR_COXA-1] && servo > mins[LR_COXA-1])
+        bioloid.setNextPose(LR_COXA, servo);
+    else{
+        printf("LR_COXA FAIL: %d\n", servo);
+    }
+    servo = 500 - sol.femur;
+    if(servo < maxs[LR_FEMUR-1] && servo > mins[LR_FEMUR-1])
+        bioloid.setNextPose(LR_FEMUR, servo);
+    else{
+        printf("LR_FEMUR FAIL: %d\n", servo);
+    }
+    servo = 670 - sol.tibia;
+    if(servo < maxs[LR_TIBIA-1] && servo > mins[LR_TIBIA-1])
+        bioloid.setNextPose(LR_TIBIA, servo);
+    else{
+        printf("LR_TIBIA FAIL: %d\n", servo);
+    }
+
+    // right middle leg
+    gait = gaitGen(RIGHT_MIDDLE);
+    gait.z = 0;
+
+    req = bodyIK(endpoints[RIGHT_MIDDLE].x+gait.x,endpoints[RIGHT_MIDDLE].y+gait.y, endpoints[RIGHT_MIDDLE].z+gait.z, 0, Y_COXA, gait.r);
+    sol = legIK(endpoints[RIGHT_MIDDLE].x+req.x+gait.x,endpoints[RIGHT_MIDDLE].y+req.y+gait.y,endpoints[RIGHT_MIDDLE].z+req.z+gait.z);
+    servo = 512 + sol.coxa;
+    if(servo < maxs[RM_COXA-1] && servo > mins[RM_COXA-1])
+        bioloid.setNextPose(RM_COXA, servo);
+    else{
+        printf("RM_COXA FAIL: %d\n", servo);
+    }
+    servo = 524 + sol.femur;
+    if(servo < maxs[RM_FEMUR-1] && servo > mins[RM_FEMUR-1])
+        bioloid.setNextPose(RM_FEMUR, servo);
+    else{
+        printf("RM_FEMUR FAIL: %d\n", servo);
+    }
+    servo = 354 + sol.tibia;
+    if(servo < maxs[RM_TIBIA-1] && servo > mins[RM_TIBIA-1])
+        bioloid.setNextPose(RM_TIBIA, servo);
+    else{
+        printf("RM_TIBIA FAIL: %d\n", servo);
+    }
+
+    // left middle leg
+    gait = gaitGen(LEFT_MIDDLE);
+    gait.z = 0;
+
     req = bodyIK(endpoints[LEFT_MIDDLE].x+gait.x,endpoints[LEFT_MIDDLE].y+gait.y, endpoints[LEFT_MIDDLE].z+gait.z, 0, -Y_COXA, gait.r);
     sol = legIK(endpoints[LEFT_MIDDLE].x+req.x+gait.x,-endpoints[LEFT_MIDDLE].y-req.y-gait.y,endpoints[LEFT_MIDDLE].z+req.z+gait.z);
     servo = 512 - sol.coxa;

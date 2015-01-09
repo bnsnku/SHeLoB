@@ -117,5 +117,6 @@ ik_sol_t legIK(int X, int Y, int Z);
 void doIK();
 /* setup the starting positions of the legs. */
 void setupIK();
+void doIK_Z0();
 
 #endif

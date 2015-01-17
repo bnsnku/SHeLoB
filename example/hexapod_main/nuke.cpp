@@ -7,7 +7,7 @@
 
 /* min and max positions for each servo */
 int mins[] = {222, 225, 159, 164, 279, 158, 223, 229, 159, 156, 272, 155, 226, 233, 158, 157, 271, 157};
-int maxs[] = {790, 792, 855, 862, 857, 747, 788, 794, 859, 857, 860, 747, 789, 789, 858, 860, 859, 743};
+int maxs[] = {790, 792, 859, 862, 859, 747, 788, 794, 859, 857, 860, 747, 789, 789, 858, 860, 859, 743};
 
 /* IK Engine */
 BioloidController bioloid = BioloidController(1); //Baud rate set to 1Mbps (1000000bps)
@@ -33,31 +33,32 @@ float cycleTime;                // cycle time in seconds (adjustment from speed 
 
 /* Setup the starting positions of the legs. */
 void setupIK(){
-  endpoints[RIGHT_FRONT].x = 52;
-  endpoints[RIGHT_FRONT].y = 118;
-  endpoints[RIGHT_FRONT].z = 97;
+    int zheight = 80;
+  endpoints[RIGHT_FRONT].x = 65;//52;
+  endpoints[RIGHT_FRONT].y = 110;//118;
+  endpoints[RIGHT_FRONT].z = zheight;
 
-  endpoints[RIGHT_REAR].x = -52;
-  endpoints[RIGHT_REAR].y = 118;
-  endpoints[RIGHT_REAR].z = 97;
+  endpoints[RIGHT_REAR].x = -65;//-52;
+  endpoints[RIGHT_REAR].y = 110;//118;
+  endpoints[RIGHT_REAR].z = zheight;
 
   endpoints[RIGHT_MIDDLE].x = 0;
-  endpoints[RIGHT_MIDDLE].y = 118;
-  endpoints[RIGHT_MIDDLE].z = 97;
+  endpoints[RIGHT_MIDDLE].y = 128;
+  endpoints[RIGHT_MIDDLE].z = zheight;
 
   endpoints[LEFT_MIDDLE].x = 0;
-  endpoints[LEFT_MIDDLE].y = -118;
-  endpoints[LEFT_MIDDLE].z = 97;
+  endpoints[LEFT_MIDDLE].y = -128;
+  endpoints[LEFT_MIDDLE].z = zheight;
 
-  endpoints[LEFT_FRONT].x = 52;
-  endpoints[LEFT_FRONT].y = -118;
-  endpoints[LEFT_FRONT].z = 97;
+  endpoints[LEFT_FRONT].x = 65;//52;
+  endpoints[LEFT_FRONT].y = -110;//-118;
+  endpoints[LEFT_FRONT].z = zheight;
 
-  endpoints[LEFT_REAR].x = -52;
-  endpoints[LEFT_REAR].y = -118;
-  endpoints[LEFT_REAR].z = 97;
+  endpoints[LEFT_REAR].x = -65;//-52;
+  endpoints[LEFT_REAR].y = -110;//-118;
+  endpoints[LEFT_REAR].z = zheight;
 
-  liftHeight = 35;
+  liftHeight = 30;
   stepsInCycle = 1;
   step = 0;
 }
@@ -118,6 +119,7 @@ ik_sol_t legIK(int X, int Y, int Z){
     d1 = sq(L_FEMUR)-sq(im)+sq(L_TIBIA);
     d2 = 2*L_TIBIA*L_FEMUR;
     ans.tibia = radToServo(acos((float)d1/(float)d2)-1.57);
+    //printf("Coxa %f; Femur %f; Tibia %f\n", (float)ans.coxa*0.2923, (float)ans.femur*0.2923, (float)ans.tibia*0.2923);
 
     return ans;
 

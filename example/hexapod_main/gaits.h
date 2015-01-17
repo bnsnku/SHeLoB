@@ -19,6 +19,7 @@ extern void (*gaitSetup)();
 #define AMBLE_SMOOTH            5
 /* tripod gaits are only for hexapods */
 #define TRIPOD                  6
+#define TRIPOD_SMOOTH           7
 #define BACK                    10                     //add by Xuan
 
 #define MOVING   ((Xspeed > 5 || Xspeed < -5) || (Yspeed > 5 || Yspeed < -5) || (Rspeed > 0.05 || Rspeed < -0.05))
@@ -110,7 +111,7 @@ ik_req_t SmoothGaitGen_Back(int leg){                  //add by Xuan
       // leg up, middle position
       gaits[leg].x = 0;
       gaits[leg].y = 0;
-      gaits[leg].z = -18;
+      gaits[leg].z = -liftHeight/2;
       gaits[leg].r = 0;
     }else if(((step == gaitLegNo[leg]+1) || (step == gaitLegNo[leg]-(stepsInCycle-1))) && (gaits[leg].z < 0)){
       // leg down position                                           NOTE: dutyFactor = pushSteps/StepsInCycle
@@ -195,6 +196,19 @@ void gaitSelect(int GaitType){
     gaitLegNo[LEFT_REAR] = 2;
     pushSteps = 2;
     stepsInCycle = 4;
+    tranTime = 200;//65;
+  }
+  else if(GaitType == TRIPOD_SMOOTH){
+    gaitGen = &SmoothGaitGen;
+    gaitSetup = &DefaultGaitSetup;
+    gaitLegNo[RIGHT_FRONT] = 0;
+    gaitLegNo[LEFT_MIDDLE] = 0;
+    gaitLegNo[RIGHT_REAR] = 0;
+    gaitLegNo[LEFT_FRONT] = 4;
+    gaitLegNo[RIGHT_MIDDLE] = 4;
+    gaitLegNo[LEFT_REAR] = 4;
+    pushSteps = 4;
+    stepsInCycle = 8;
     tranTime = 65;
   }
   else if(GaitType == BACK){        //add by Xuan
@@ -206,6 +220,7 @@ void gaitSelect(int GaitType){
     gaitLegNo[LEFT_FRONT] = 6;
     gaitLegNo[RIGHT_MIDDLE] = 8;
     gaitLegNo[LEFT_REAR] = 10;
+    pushSteps = 0;
     stepsInCycle = 12;
   }
 

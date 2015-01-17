@@ -24,8 +24,8 @@
   extern ik_req_t gaits[];
 
 #define RIPPLE_SPEED    1
-#define AMBLE_SPEED     3
-#define TRIPOD_SPEED    5
+#define AMBLE_SPEED     2
+#define TRIPOD_SPEED    4
 
 #ifdef AX12_HEXAPOD
 #define TOP_SPEED      10
@@ -95,49 +95,53 @@
     switch(key)
     {
       case 'w':
-      Xspeed = 50;
+      Xspeed = multiplier*20;
       Yspeed = 0;
       Rspeed = 0;
       break;
       case 's':
-      Xspeed = -50;
+      Xspeed = multiplier*-20;
       Yspeed = 0;
       Rspeed = 0;
       break;
       case 'd':
       Xspeed = 0;
-      Yspeed = 50;
+      Yspeed = multiplier*20;
       Rspeed = 0;
       break;
       case 'a':
       Xspeed = 0;
-      Yspeed = -50;
+      Yspeed = multiplier*-20;
       Rspeed = 0;
       break;
       case 'z':
       gaitSelect(RIPPLE_SMOOTH);
       multiplier = RIPPLE_SPEED;
-      flag = 1;
+      return;
       break;
       case 'x':
       gaitSelect(AMBLE_SMOOTH);
       multiplier = AMBLE_SPEED;
-      flag = 1;
+      return;
       break;
       case 'c':
       gaitSelect(RIPPLE);
       multiplier = RIPPLE_SPEED;
-      flag = 1;
+      return;
       break;
       case 'v':
       gaitSelect(AMBLE);
       multiplier = AMBLE_SPEED;
-      flag = 1;
+      return;
       break;
       case 'b':
       gaitSelect(TRIPOD);
       multiplier = TRIPOD_SPEED;
-      flag = 1;
+      return;
+      break;
+      case 'n':
+      gaitSelect(TRIPOD_SMOOTH);
+      multiplier = TRIPOD_SPEED;
       break;
       case 'q':
       control = 0;
@@ -227,9 +231,6 @@
   // update joints
     bioloid.interpolateStep();
     }
-  else if (flag == 1)
-  {  
-  }
   else if(flag == 2)    //add by Xuan
   {
     if(bioloid.interpolating == 0){
